@@ -5,37 +5,31 @@
 
 package eu.emi.security.canl.tomcat;
 
-import org.apache.tomcat.util.net.SSLImplementation;
-import org.apache.tomcat.util.net.SSLSupport;
+import java.io.InputStream;
+import java.util.Properties;
+
+import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.ServerSocketFactory;
 import org.apache.tomcat.util.net.jsse.JSSEImplementation;
 
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.Socket;
-import java.util.Properties;
-
-import javax.net.ssl.SSLSession;
-
 /**
- * The main Tomcat 5 and 6 glue class, tomcat 7 is different, and will need
- * another implementation
  * 
  * Created on 2012-06-13
  * 
  * @author Joni Hahkala
  */
-public class CANLSSLImplementation extends SSLImplementation {
+public class CANLSSLImplementation
+    extends JSSEImplementation {
 
     /**
-     * The constructor for the class, does nothing except checks that the actual
-     * ssl implementation TrustManager is present.
+     * The constructor for the class, does nothing except checks that the actual ssl implementation TrustManager is
+     * present.
      * 
-     * @throws ClassNotFoundException in case the util-java is not installed and
-     *             thus ContextWrapper class isn't found.
+     * @throws ClassNotFoundException
+     *             in case the util-java is not installed and thus ContextWrapper class isn't found.
      */
     public CANLSSLImplementation() throws ClassNotFoundException {
-        // Reading resources of JAR file
+
         InputStream in = null;
         Properties props = null;
         try {
@@ -90,87 +84,14 @@ public class CANLSSLImplementation extends SSLImplementation {
      * 
      * @see org.apache.tomcat.util.net.SSLImplementation#getImplementationName()
      */
+    @Override
     public String getImplementationName() {
         return "CANL-SSL";
     }
 
-    /*
-     * The method used by Tomcat to get the actual SSLServerSocketFactory to use
-     * to create the ServerSockets.
-     * 
-     * @see
-     * org.apache.tomcat.util.net.SSLImplementation#getServerSocketFactory()
-     */
-    public ServerSocketFactory getServerSocketFactory() {
-        return new CANLSSLServerSocketFactory();
-    }
-
-    /*
-     * The method used to get the class that provides the SSL support functions.
-     * Current implementation reuses Tomcat's own JSSE SSLSupport class as we
-     * use JSSE internally too (with modifications to the certificate path
-     * checking of course.
-     * 
-     * @see
-     * org.apache.tomcat.util.net.SSLImplementation#getSSLSupport(java.net.Socket
-     * )
-     */
-    public SSLSupport getSSLSupport(Socket arg0) {
-        try {
-            JSSEImplementation impl = new JSSEImplementation();
-
-            return impl.getSSLSupport(arg0);
-        } catch (ClassNotFoundException e) {
-            System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
-                    + e.getMessage());
-
-            return null;
-        }
-    }
-
-    /*
-     * The method used to get the class that provides the SSL support functions.
-     * Current implementation reuses Tomcat's own JSSE SSLSupport class as we
-     * use JSSE internally too (with modifications to the certificate path
-     * checking of course.
-     * 
-     * @see
-     * org.apache.tomcat.util.net.SSLImplementation#getSSLSupport(java.net.ssl
-     * .SSLSession)
-     */
-    public SSLSupport getSSLSupport(SSLSession arg0) {
-        try {
-            JSSEImplementation impl = new JSSEImplementation();
-            // hack to get past tomcat5 missing this method and tomcat6
-            // requiring it.
-            java.lang.reflect.Method method;
-
-            try {
-                method = impl.getClass().getMethod("getSSLSupport", arg0.getClass());
-            } catch (NoSuchMethodException e) {
-                // this is tomcat5, so no action.
-                return null;
-            }
-
-            try {
-                return (SSLSupport) method.invoke(impl, arg0);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
-                        + e.getMessage());
-            } catch (IllegalAccessException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
-                        + e.getMessage());
-            } catch (InvocationTargetException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
-                        + e.getMessage());
-            }
-            return null;
-        } catch (ClassNotFoundException e) {
-            System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
-                    + e.getMessage());
-
-            return null;
-        }
+    @Override
+    public ServerSocketFactory getServerSocketFactory(AbstractEndpoint endpoint)  {
+        return new CANLSSLServerSocketFactory(endpoint);
     }
 
 }
