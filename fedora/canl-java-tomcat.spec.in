@@ -116,6 +116,11 @@ elif [ ${tomcat_ver}x == "tomcatx" ] ; then
         else
                 echo "/usr/share/java/bcprov.jar not found, cannot link it to the tomcat server/lib"
         fi
+        if [ -f /usr/share/java/bcpkix.jar ] ; then
+                ln -snf /usr/share/java/bcpkix.jar /usr/share/tomcat/lib/bcpkix-new.jar
+        else
+                echo "/usr/share/java/bcpkix.jar not found, cannot link it to the tomcat server/lib"
+        fi
         if [ -f /usr/share/java/commons-io.jar ] ; then
                 ln -snf /usr/share/java/commons-io.jar /usr/share/tomcat/lib/commons-io-new.jar
         else
@@ -148,6 +153,7 @@ if [ "$1" = "0" ] ; then
     else
         rm -f /usr/share/tomcat/lib/%{name}-new.jar
         rm -f /usr/share/tomcat/lib/bcprov-new.jar
+        rm -f /usr/share/tomcat/lib/bcpkix-new.jar
         rm -f /usr/share/tomcat/lib/commons-io-new.jar
         rm -f /usr/share/tomcat/lib/canl-new.jar
 	fi
