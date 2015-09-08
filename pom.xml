@@ -5,7 +5,7 @@
 
 	<groupId>eu.eu-emi.security</groupId>
 	<artifactId>canl-java-tomcat</artifactId>
-	<version>0.1.18</version>
+	<version>0.2.1</version>
 
 	<name>Common Auhtentication Library Tomcat plugin</name>
 	<url>https://twiki.cern.ch/twiki/bin/view/EMI/CANLTomcatPlugin</url>
@@ -24,9 +24,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>tomcat</groupId>
+			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-coyote</artifactId>
-			<version>5.5.23</version>
+			<version>7.0.54</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -36,12 +36,12 @@
 		<dependency>
 			<groupId>eu.eu-emi.security</groupId>
 			<artifactId>canl</artifactId>
-			<version>1.1.0</version>
+			<version>2.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>tomcat</groupId>
+			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-util</artifactId>
-			<version>5.5.23</version>
+			<version>7.0.54</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -104,7 +104,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
 				<version>1.4</version>
@@ -117,7 +117,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin -->
 		</plugins>
 	</build>
 
