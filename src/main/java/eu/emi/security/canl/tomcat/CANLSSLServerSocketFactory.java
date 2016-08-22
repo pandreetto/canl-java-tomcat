@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -52,6 +53,8 @@ import eu.emi.security.authn.x509.impl.ValidatorParams;
 public class CANLSSLServerSocketFactory
     extends JSSESocketFactory {
 
+    private static final Logger logger = Logger.getLogger(CANLSSLServerSocketFactory.class.getCanonicalName());
+
     /** The internal serversocket instance. */
     // protected SSLServerSocketFactory _serverSocketFactory = null;
 
@@ -77,7 +80,7 @@ public class CANLSSLServerSocketFactory
             asock = (SSLSocket) sSocket.accept();
             configureClientAuth(asock);
             String ip = asock.getInetAddress().toString();
-            System.out.println(new Date().toString() + " : connection from " + ip);
+            logger.info(new Date().toString() + " : connection from " + ip);
         } catch (SSLException e) {
             throw new SocketException("SSL handshake error" + e.toString());
         }
@@ -161,7 +164,7 @@ public class CANLSSLServerSocketFactory
         StoreUpdateListener listener = new StoreUpdateListener() {
             public void loadingNotification(String location, String type, Severity level, Exception cause) {
                 if (level != Severity.NOTIFICATION) {
-                    System.out.println("Error when creating or using SSL socket. Type " + type + " level: " + level
+                    logger.severe("Error when creating or using SSL socket. Type " + type + " level: " + level
                             + ((cause == null) ? "" : (" cause: " + cause.getClass() + ":" + cause.getMessage())));
                 } else {
                     // log successful (re)loading
@@ -227,11 +230,11 @@ public class CANLSSLServerSocketFactory
         ValidationErrorListener validationListener = new ValidationErrorListener() {
             @Override
             public boolean onValidationError(ValidationError error) {
-                System.out.println("Error when validating incoming certificate: " + error.getMessage() + " position: "
+                logger.severe("Error when validating incoming certificate: " + error.getMessage() + " position: "
                         + error.getPosition() + " " + error.getParameters());
                 X509Certificate chain[] = error.getChain();
                 for (X509Certificate cert : chain) {
-                    System.out.println(cert.toString());
+                    logger.fine(cert.toString());
                 }
                 return false;
             }
@@ -245,8 +248,8 @@ public class CANLSSLServerSocketFactory
             throw new IOException(
                     "Variable hostcert undefined, cannot start server with SSL/TLS without host certificate.");
         }
-        java.security.cert.X509Certificate[] hostCertChain = CertificateUtils.loadCertificateChain(new FileInputStream(
-                hostCertLoc), Encoding.PEM);
+        java.security.cert.X509Certificate[] hostCertChain = CertificateUtils
+                .loadCertificateChain(new FileInputStream(hostCertLoc), Encoding.PEM);
 
         String hostKeyLoc = (String) endpoint.getAttribute("hostkey");
         if (hostKeyLoc == null) {
@@ -267,7 +270,7 @@ public class CANLSSLServerSocketFactory
         /*
          * end of the customization
          */
-        
+
         SSLSessionContext sessionContext = context.getServerSessionContext();
         if (sessionContext != null) {
             configureSessionContext(sessionContext);

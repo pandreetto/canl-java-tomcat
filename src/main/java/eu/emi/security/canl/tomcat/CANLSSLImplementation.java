@@ -7,6 +7,8 @@ package eu.emi.security.canl.tomcat;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.ServerSocketFactory;
@@ -20,6 +22,8 @@ import org.apache.tomcat.util.net.jsse.JSSEImplementation;
  */
 public class CANLSSLImplementation
     extends JSSEImplementation {
+
+    private static final Logger logger = Logger.getLogger(CANLSSLImplementation.class.getCanonicalName());
 
     /**
      * The constructor for the class, does nothing except checks that the actual ssl implementation TrustManager is
@@ -38,11 +42,10 @@ public class CANLSSLImplementation
             props = new Properties();
             props.load(in);
             String canlTomcatVersion = props.getProperty("version");
-            System.out.println("Tomcat pluging version " + canlTomcatVersion + " starting.");
+            logger.info("Tomcat pluging version " + canlTomcatVersion + " starting.");
         } catch (Exception e) {
-            System.out.println("Canl tomcat plugin starting, version information loading failed. " + in + ", " + props
-                    + " exception: " + e + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.log(Level.SEVERE,
+                    "Canl tomcat plugin starting, version information loading failed: " + e.getMessage(), e);
         }
         try {
             in = this.getClass().getClassLoader()
@@ -50,7 +53,7 @@ public class CANLSSLImplementation
             props = new Properties();
             props.load(in);
             String canlVersion = props.getProperty("version");
-            System.out.println("CANL version " + canlVersion + " starting.");
+            logger.info("CANL version " + canlVersion + " starting.");
         } catch (Exception e) {
             boolean oldSuccess = false;
             try {
@@ -59,15 +62,14 @@ public class CANLSSLImplementation
                 props = new Properties();
                 props.load(in);
                 String canlVersion = props.getProperty("version");
-                System.out.println("CANL version " + canlVersion + " starting.");
+                logger.info("CANL version " + canlVersion + " starting.");
                 oldSuccess = true;
             } catch (Exception ex) {
                 // ignore failure in fallback
             }
             if (!oldSuccess) {
-                System.out.println("Canl tomcat plugin starting, canl version information loading failed. " + in + ", "
-                        + props + " exception: " + e + ": " + e.getMessage());
-                e.printStackTrace();
+                logger.log(Level.SEVERE,
+                        "Canl tomcat plugin starting, canl version information loading failed: " + e.getMessage(), e);
             }
         }
         // Check to see if canl is floating around
@@ -90,7 +92,7 @@ public class CANLSSLImplementation
     }
 
     @Override
-    public ServerSocketFactory getServerSocketFactory(AbstractEndpoint endpoint)  {
+    public ServerSocketFactory getServerSocketFactory(AbstractEndpoint endpoint) {
         return new CANLSSLServerSocketFactory(endpoint);
     }
 
