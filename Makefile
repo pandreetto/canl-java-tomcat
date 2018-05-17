@@ -18,7 +18,7 @@
 name=canl-java-tomcat
 
 version=0.2.1
-release=1
+release=2
 
 prefix=/
 deb_name=lib$(name)
