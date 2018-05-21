@@ -16,6 +16,8 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLServerSocket;
@@ -52,6 +54,8 @@ import eu.emi.security.authn.x509.impl.ValidatorParams;
  */
 public class CANLSSLServerSocketFactory extends ServerSocketFactory {
 
+    private static final Logger logger = Logger.getLogger(CANLSSLServerSocketFactory.class.getCanonicalName());
+
     /** The internal serversocket instance. */
     protected SSLServerSocketFactory _serverSocketFactory = null;
 
@@ -76,7 +80,7 @@ public class CANLSSLServerSocketFactory extends ServerSocketFactory {
             asock = (SSLSocket) sSocket.accept();
             configureClientAuth(asock);
             String ip = asock.getInetAddress().toString();
-			System.out.println(new Date().toString() + " : connection from " + ip);
+			logger.info(new Date().toString() + " : connection from " + ip);
         } catch (SSLException e) {
             throw new SocketException("SSL handshake error" + e.toString());
         }
@@ -164,7 +168,7 @@ public class CANLSSLServerSocketFactory extends ServerSocketFactory {
         StoreUpdateListener listener = new StoreUpdateListener() {
             public void loadingNotification(String location, String type, Severity level, Exception cause) {
                 if (level != Severity.NOTIFICATION) {
-                    System.out.println("Error when creating or using SSL socket. Type " + type + " level: " + level
+                    logger.log(Level.SEVERE, "Error when creating or using SSL socket. Type " + type + " level: " + level
                             + ((cause == null) ? "" : (" cause: " + cause.getClass() + ":" + cause.getMessage())));
                 } else {
                     // log successful (re)loading
@@ -230,11 +234,11 @@ public class CANLSSLServerSocketFactory extends ServerSocketFactory {
         ValidationErrorListener validationListener = new ValidationErrorListener() {
             @Override
             public boolean onValidationError(ValidationError error) {
-                System.out.println("Error when validating incoming certificate: " + error.getMessage() + " position: "
+                logger.log(Level.SEVERE, "Error when validating incoming certificate: " + error.getMessage() + " position: "
                         + error.getPosition() + " " + error.getParameters());
                 X509Certificate chain[] = error.getChain();
                 for (X509Certificate cert : chain) {
-                    System.out.println(cert.toString());
+                    logger.log(Level.SEVERE, cert.toString());
                 }
                 return false;
             }

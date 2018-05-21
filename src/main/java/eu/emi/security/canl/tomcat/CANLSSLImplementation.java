@@ -10,10 +10,10 @@ import org.apache.tomcat.util.net.SSLSupport;
 import org.apache.tomcat.util.net.ServerSocketFactory;
 import org.apache.tomcat.util.net.jsse.JSSEImplementation;
 
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
-import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLSession;
 
@@ -27,6 +27,8 @@ import javax.net.ssl.SSLSession;
  */
 public class CANLSSLImplementation extends SSLImplementation {
 
+    private static final Logger logger = Logger.getLogger(CANLSSLImplementation.class.getCanonicalName());
+
     /**
      * The constructor for the class, does nothing except checks that the actual
      * ssl implementation TrustManager is present.
@@ -35,47 +37,6 @@ public class CANLSSLImplementation extends SSLImplementation {
      *             thus ContextWrapper class isn't found.
      */
     public CANLSSLImplementation() throws ClassNotFoundException {
-        // Reading resources of JAR file
-        InputStream in = null;
-        Properties props = null;
-        try {
-            in = this.getClass().getClassLoader()
-                    .getResourceAsStream("META-INF/maven/eu.eu-emi.security/canl-java-tomcat/pom.properties");
-            props = new Properties();
-            props.load(in);
-            String canlTomcatVersion = props.getProperty("version");
-            System.out.println("Tomcat pluging version " + canlTomcatVersion + " starting.");
-        } catch (Exception e) {
-            System.out.println("Canl tomcat plugin starting, version information loading failed. " + in + ", " + props
-                    + " exception: " + e + ": " + e.getMessage());
-            e.printStackTrace();
-        }
-        try {
-            in = this.getClass().getClassLoader()
-                    .getResourceAsStream("META-INF/maven/eu.eu-emi.security/canl/pom.properties");
-            props = new Properties();
-            props.load(in);
-            String canlVersion = props.getProperty("version");
-            System.out.println("CANL version " + canlVersion + " starting.");
-        } catch (Exception e) {
-            boolean oldSuccess = false;
-            try {
-                in = this.getClass().getClassLoader()
-                        .getResourceAsStream("META-INF/maven/eu.emi.security/canl/pom.properties");
-                props = new Properties();
-                props.load(in);
-                String canlVersion = props.getProperty("version");
-                System.out.println("CANL version " + canlVersion + " starting.");
-                oldSuccess = true;
-            } catch (Exception ex) {
-                // ignore failure in fallback
-            }
-            if (!oldSuccess) {
-                System.out.println("Canl tomcat plugin starting, canl version information loading failed. " + in + ", "
-                        + props + " exception: " + e + ": " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
         // Check to see if canl is floating around
         // somewhere, will fail if it is not found throwing
         // an exception, this forces early failure in case there is no hope of
@@ -121,7 +82,7 @@ public class CANLSSLImplementation extends SSLImplementation {
 
             return impl.getSSLSupport(arg0);
         } catch (ClassNotFoundException e) {
-            System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
+            logger.log(Level.SEVERE, "Internal server error, JSSEImplementation class creation failed: " + e.getClass()
                     + e.getMessage());
 
             return null;
@@ -155,18 +116,18 @@ public class CANLSSLImplementation extends SSLImplementation {
             try {
                 return (SSLSupport) method.invoke(impl, arg0);
             } catch (IllegalArgumentException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
+                logger.log(Level.SEVERE, "Internal server error, JSSEImplementation class creation failed: " + e.getClass()
                         + e.getMessage());
             } catch (IllegalAccessException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
+                logger.log(Level.SEVERE, "Internal server error, JSSEImplementation class creation failed: " + e.getClass()
                         + e.getMessage());
             } catch (InvocationTargetException e) {
-                System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
+                logger.log(Level.SEVERE, "Internal server error, JSSEImplementation class creation failed: " + e.getClass()
                         + e.getMessage());
             }
             return null;
         } catch (ClassNotFoundException e) {
-            System.out.println("Internal server error, JSSEImplementation class creation failed: " + e.getClass()
+            logger.log(Level.SEVERE, "Internal server error, JSSEImplementation class creation failed: " + e.getClass()
                     + e.getMessage());
 
             return null;
