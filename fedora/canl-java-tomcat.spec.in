@@ -58,8 +58,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{_tomcat}/lib/*.jar
 %doc README.md doc/RELEASE-NOTES doc/COPYRIGHT doc/LICENSE doc/USAGE
 
+%post
+# workaround: remove symlinks from v.0.1.18 (to be removed ASAP)
+[ -h /usr/share/tomcat6/lib/canl-java-tomcat-new.jar ] && rm -f /usr/share/tomcat6/lib/canl-java-tomcat-new.jar
+[ -h /usr/share/tomcat6/lib/bcprov-new.jar ] && rm -f /usr/share/tomcat6/lib/bcprov-new.jar
+[ -h /usr/share/tomcat6/lib/commons-io-new.jar ] && rm -f /usr/share/tomcat6/lib/commons-io-new.jar
+[ -h /usr/share/tomcat6/lib/canl-new.jar ] && rm -f /usr/share/tomcat6/lib/canl-new.jar
 
 %changelog
+* Tue Jul 17 2018 CREAM group <cream-support@lists.infn.it> - @PKGVERSION@-@PKGRELEASE@
+- Compatibility with the latest version of VOMS and CAnL
+
 * Tue Sep 16 2013 Joni Hahkala <joni.hahkala@cern.ch> 0.1.18-1
 - Bug fix for preun removing links during upgrade, changed to postun and only run when
   last version is removed. Change the name of links as the old version removes the old
